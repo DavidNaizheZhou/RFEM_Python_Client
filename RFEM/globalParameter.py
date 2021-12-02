@@ -78,3 +78,89 @@ class GlobalParameter():
 
         # Add Global Parameter to client model
         clientModel.service.set_global_parameter(clientObject)
+
+    def get_list_of_parameters_formula_allowed_for(self,
+                                                   object_type=ObjectTypes.E_OBJECT_TYPE_SECTION,
+                                                   object_no: int = 1,
+                                                   parent_no: int = 1):
+        """
+        Use this funtion to get all available properties for desired object type.
+
+        Args:
+            object_type (enum, required): Defaults to "E_OBJECT_TYPE_SECTION".
+            object_no (int, required): Defaults to 1.
+            parent_no (int, optional): Defaults to 1.
+        """
+        # Client model | Object Location
+        clientObject = clientModel.factory.create('ns0:object_location')
+
+        clientObject.type = object_type.name
+        clientObject.no = object_no
+        clientObject.parent_no = parent_no
+
+        list_of_parameters = clientModel.service.get_list_of_parameters_formula_allowed_for(
+            clientObject)
+        for param in list_of_parameters.object_parameter_location:
+            print(param.attribute)
+
+    def get_formula(self,
+                    object_type=ObjectTypes.E_OBJECT_TYPE_SECTION,
+                    object_no: int = 1,
+                    property: str = "area_shear_y",
+                    parent_no: int = 1):
+        """
+        Returns formula for given object type, number and property.
+
+        Args:
+            object_type (enum, required): Defaults to "E_OBJECT_TYPE_GLOBAL_PARAMETER".
+            object_no (int, required): Defaults to 1.
+            property (string, required): Defaults to "area_shear_y".
+            parent_no (int, optional): Defaults to 1.
+        """
+        # Object Location
+        object_location = clientModel.factory.create('ns0:object_location')
+
+        object_location.type = object_type.name
+        object_location.no = object_no
+        object_location.parent_no = parent_no
+
+        # Object Parameter Location Type
+        parameter_location = clientModel.factory.create(
+            'ns0:object_parameter_location_type')
+        parameter_location.attribute = property
+
+        # Return Formula
+        return clientModel.service.get_formula(object_location, parameter_location)
+
+    def set_formula(self,
+                    object_type=ObjectTypes.E_OBJECT_TYPE_SECTION,
+                    object_no: int = 1,
+                    property: str = "area_shear_y",
+                    formula: str = "1425/100",
+                    parent_no: int = 1):
+        """
+        Set formula for given object type, number and property.
+
+        Args:
+            object_type (Enum, required): Defaults to "E_OBJECT_TYPE_GLOBAL_PARAMETER".
+            object_no (int, required): Defaults to 1.
+            property (string, required): Defaults to "area_shear_y".
+            formula (string, required): Defaults to "beta/1000".
+            parent_no (int, optional): Defaults to 1.
+        """
+
+        # Object Location
+        object_location = clientModel.factory.create('ns0:object_location')
+
+        object_location.type = object_type.name
+        object_location.no = object_no
+        object_location.parent_no = parent_no
+
+        # Object Parameter Location Type
+        parameter_location = clientModel.factory.create(
+            'ns0:object_parameter_location_type')
+        parameter_location.attribute = property
+
+        # Set Formula
+        clientModel.service.set_formula(
+            object_location, parameter_location, formula)

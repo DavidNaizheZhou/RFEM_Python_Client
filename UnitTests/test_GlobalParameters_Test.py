@@ -10,6 +10,8 @@ from RFEM.enums import *
 from RFEM.globalParameter import *
 from RFEM.dataTypes import *
 from RFEM.initModel import *
+from RFEM.BasicObjects.section import *
+from RFEM.BasicObjects.material import *
 
 def test_global_parameters():
 
@@ -63,3 +65,23 @@ def test_global_parameters():
     print('Ready!')
 
     clientModel.service.finish_modification()
+
+def test_get_list_of_parameters_formula_allowed_for():
+
+    clientModel.service.begin_modification('new')
+    Material(2, "S550GD 1.0531")
+    Section(4, "Cable 14.00", 2)
+    GlobalParameter.get_list_of_parameters_formula_allowed_for("", ObjectTypes.E_OBJECT_TYPE_SECTION, 4)
+    print('Ready!')
+    clientModel.service.finish_modification()
+
+def test_set_and_get_formula():
+
+    clientModel.service.begin_modification('new')
+    Material(2)
+    Section(4, "RHSPOI 400/150/10/45", 2)
+    GlobalParameter.set_formula("", ObjectTypes.E_OBJECT_TYPE_SECTION,4,"area_shear_y","0.1448/100")
+    formula = GlobalParameter.get_formula("",ObjectTypes.E_OBJECT_TYPE_SECTION,4,"area_shear_y")
+    print('Ready!')
+    clientModel.service.finish_modification()
+    assert formula == "0.1448/100"

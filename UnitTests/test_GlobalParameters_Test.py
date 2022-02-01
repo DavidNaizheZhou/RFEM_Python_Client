@@ -41,31 +41,31 @@ def test_global_parameters():
                     definition_parameter= ['a+1.5'],
                     comment= 'b')
 
-    # TODO: issue with optimization type
-    #SetAddonStatus(Model.clientModel, 'cost_estimation_active')
-    #GlobalParameter(no= 3,
-    #                 name= 'c',
-    #                 symbol= 'c',
-    #                 unit_group= GlobalParameterUnitGroup.LOADS_DENSITY,
-    #                 definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_OPTIMIZATION,
-    #                 definition_parameter= [10, 90, 2, 40],
-    #                 comment= 'c')
+    # TODO: bug 25058 is ToReview
+    SetAddonStatus(Model.clientModel, 'cost_estimation_active')
+    GlobalParameter(no= 3,
+                     name= 'c',
+                     symbol= 'c',
+                     unit_group= GlobalParameterUnitGroup.LOADS_DENSITY,
+                     definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_OPTIMIZATION,
+                     definition_parameter= [12, 10, 90, 40],
+                     comment= 'c')
 
-    # GlobalParameter(no= 4,
-    #                 name= 'D',
-    #                 symbol= 'D',
-    #                 unit_group= GlobalParameterUnitGroup.AREA,
-    #                 definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_OPTIMIZATION_ASCENDING,
-    #                 definition_parameter= [50, 0, 100, 4],
-    #                 comment= 'D')
+    GlobalParameter(no= 4,
+                     name= 'D',
+                     symbol= 'D',
+                     unit_group= GlobalParameterUnitGroup.AREA,
+                     definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_OPTIMIZATION_ASCENDING,
+                     definition_parameter= [50, 0, 100, 10],
+                     comment= 'D')
 
-    #GlobalParameter(no= 5,
-    #                name= 'E',
-    #                symbol= 'E',
-    #                unit_group= GlobalParameterUnitGroup.MATERIAL_QUANTITY_INTEGER,
-    #                definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_OPTIMIZATION_ASCENDING,
-    #                definition_parameter= [50, 0, 100, 4],
-    #                comment= 'E')
+    GlobalParameter(no= 5,
+                    name= 'E',
+                    symbol= 'E',
+                    unit_group= GlobalParameterUnitGroup.MATERIAL_QUANTITY_INTEGER,
+                    definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_OPTIMIZATION_ASCENDING,
+                    definition_parameter= [50, 0, 100, 10],
+                    comment= 'E')
 
     GlobalParameter(no= 6,
                     name= 'f',
@@ -76,6 +76,17 @@ def test_global_parameters():
                     comment= 'f')
 
     Model.clientModel.service.finish_modification()
+
+    gp = Model.clientModel.service.get_global_parameter(2)
+    assert gp.formula == 'a+1.5'
+    gp = Model.clientModel.service.get_global_parameter(3)
+    assert gp.increment == 2
+    gp = Model.clientModel.service.get_global_parameter(4)
+    assert gp.increment == 10
+    gp = Model.clientModel.service.get_global_parameter(5)
+    assert gp.increment == 10
+    gp = Model.clientModel.service.get_global_parameter(6)
+    assert gp.value == 0.25
 
 def test_get_list_of_parameters_formula_allowed_for():
 

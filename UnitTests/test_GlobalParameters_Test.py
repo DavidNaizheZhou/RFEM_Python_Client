@@ -2,86 +2,105 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.append(".")
+import os
+PROJECT_ROOT = os.path.abspath(os.path.join(
+                  os.path.dirname(__file__),
+                  os.pardir)
+)
+sys.path.append(PROJECT_ROOT)
 
 # Importing the relevant libraries
-from os import name
-from RFEM.enums import *
-from RFEM.globalParameter import *
-from RFEM.dataTypes import *
-from RFEM.initModel import *
-from RFEM.BasicObjects.section import *
-from RFEM.BasicObjects.material import *
+from RFEM.enums import GlobalParameterUnitGroup, GlobalParameterDefinitionType
+from RFEM.globalParameter import GlobalParameter
+from RFEM.enums import ObjectTypes
+from RFEM.initModel import Model, SetAddonStatus
+from RFEM.BasicObjects.section import Section
+from RFEM.BasicObjects.material import Material
+
+if Model.clientModel is None:
+    Model()
 
 def test_global_parameters():
 
-    clientModel.service.begin_modification('new')
-    #not yet implemented in RFEM6 GM
-    GlobalParameter.AddParameter(GlobalParameter,
-                                 no= 1,
-                                 name= 'Test_1',
-                                 symbol= 'Test_1',
-                                 unit_group= GlobalParameterUnitGroup.LENGTH,
-                                 definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_FORMULA,
-                                 definition_parameter= ['1+1'],
-                                 comment= 'Comment_1')
-    # issue with optimization type
-    # GlobalParameter.AddParameter(GlobalParameter,
-    #                              no= 2,
-    #                              name= 'Test_2',
-    #                              symbol= 'Test_2',
-    #                              unit_group= GlobalParameterUnitGroup.LOADS_DENSITY,
-    #                              definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_OPTIMIZATION,
-    #                              definition_parameter= [50, 0, 100, 4],
-    #                              comment= 'Comment_2')
+    Model.clientModel.service.delete_all()
+    Model.clientModel.service.begin_modification()
 
-    # GlobalParameter.AddParameter(GlobalParameter,
-    #                             no= 3,
-    #                             name= 'Test_3',
-    #                             symbol= 'Test_3',
-    #                             unit_group= GlobalParameterUnitGroup.AREA,
-    #                             definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_OPTIMIZATION_ASCENDING,
-    #                             definition_parameter= [50, 0, 100, 4],
-    #                             comment= 'Comment_3')
+    GlobalParameter(no= 1,
+                    name= 'a',
+                    symbol= 'a',
+                    unit_group= GlobalParameterUnitGroup.LENGTH,
+                    definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_VALUE,
+                    definition_parameter= ['10'],
+                    comment= 'param a')
 
-    # GlobalParameter.AddParameter(GlobalParameter,
-    #                             no= 4,
-    #                             name= 'Test_4',
-    #                             symbol= 'Test_4',
-    #                             unit_group= GlobalParameterUnitGroup.MATERIAL_QUANTITY_INTEGER,
-    #                             definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_OPTIMIZATION_ASCENDING,
-    #                             definition_parameter= [50, 0, 100, 4],
-    #                             comment= 'Comment_4')
+    GlobalParameter(no= 2,
+                    name= 'b',
+                    symbol= 'b',
+                    unit_group= GlobalParameterUnitGroup.LENGTH,
+                    definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_FORMULA,
+                    definition_parameter= ['a+1.5'],
+                    comment= 'b')
 
-    GlobalParameter.AddParameter(GlobalParameter,
-                                no= 5,
-                                name= 'Test_5',
-                                symbol= 'Test_5',
-                                unit_group= GlobalParameterUnitGroup.DIMENSIONLESS,
-                                definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_VALUE,
-                                definition_parameter= [0.25],
-                                comment= 'Comment_5')
+    # TODO: issue with optimization type
+    #SetAddonStatus(Model.clientModel, 'cost_estimation_active')
+    #GlobalParameter(no= 3,
+    #                 name= 'c',
+    #                 symbol= 'c',
+    #                 unit_group= GlobalParameterUnitGroup.LOADS_DENSITY,
+    #                 definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_OPTIMIZATION,
+    #                 definition_parameter= [10, 90, 2, 40],
+    #                 comment= 'c')
 
-    print('Ready!')
+    # GlobalParameter(no= 4,
+    #                 name= 'D',
+    #                 symbol= 'D',
+    #                 unit_group= GlobalParameterUnitGroup.AREA,
+    #                 definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_OPTIMIZATION_ASCENDING,
+    #                 definition_parameter= [50, 0, 100, 4],
+    #                 comment= 'D')
 
-    clientModel.service.finish_modification()
+    #GlobalParameter(no= 5,
+    #                name= 'E',
+    #                symbol= 'E',
+    #                unit_group= GlobalParameterUnitGroup.MATERIAL_QUANTITY_INTEGER,
+    #                definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_OPTIMIZATION_ASCENDING,
+    #                definition_parameter= [50, 0, 100, 4],
+    #                comment= 'E')
+
+    GlobalParameter(no= 6,
+                    name= 'f',
+                    symbol= 'f',
+                    unit_group= GlobalParameterUnitGroup.DIMENSIONLESS,
+                    definition_type= GlobalParameterDefinitionType.DEFINITION_TYPE_VALUE,
+                    definition_parameter= [0.25],
+                    comment= 'f')
+
+    Model.clientModel.service.finish_modification()
 
 def test_get_list_of_parameters_formula_allowed_for():
 
-    clientModel.service.begin_modification('new')
+    Model.clientModel.service.begin_modification()
     Material(2, "S550GD 1.0531")
     Section(4, "Cable 14.00", 2)
-    GlobalParameter.get_list_of_parameters_formula_allowed_for("", ObjectTypes.E_OBJECT_TYPE_SECTION, 4)
-    print('Ready!')
-    clientModel.service.finish_modification()
+    glob_params = GlobalParameter.get_list_of_parameters_formula_allowed_for("", ObjectTypes.E_OBJECT_TYPE_SECTION, 4)
+
+    Model.clientModel.service.finish_modification()
+
+    assert len(glob_params) == 4
+    assert glob_params[0] == 'rotation_angle'
+    assert glob_params[1] == 'depth_temperature_load'
+    assert glob_params[2] == 'width_temperature_load'
 
 def test_set_and_get_formula():
 
-    clientModel.service.begin_modification('new')
+    Model.clientModel.service.begin_modification()
     Material(2)
     Section(4, "RHSPOI 400/150/10/45", 2)
     GlobalParameter.set_formula("", ObjectTypes.E_OBJECT_TYPE_SECTION,4,"area_shear_y","0.1448/100")
     formula = GlobalParameter.get_formula("",ObjectTypes.E_OBJECT_TYPE_SECTION,4,"area_shear_y")
-    print('Ready!')
-    clientModel.service.finish_modification()
-    assert formula == "0.1448/100"
+
+    Model.clientModel.service.finish_modification()
+
+    assert formula.formula == '0.1448/100'
+    assert formula.is_valid == True
+    assert round(formula.calculated_value, 7) == 0.0014489

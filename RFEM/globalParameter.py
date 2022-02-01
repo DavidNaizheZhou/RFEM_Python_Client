@@ -1,18 +1,17 @@
-from RFEM.initModel import *
-from RFEM.enums import GlobalParameterUnitGroup, GlobalParameterDefinitionType
-from enum import Enum
+from RFEM.initModel import Model, clearAtributes
+from RFEM.enums import GlobalParameterUnitGroup, GlobalParameterDefinitionType, ObjectTypes
 
 class GlobalParameter():
 
-    def AddParameter(self,
-                     no: int = 1,
-                     name: str = '',
-                     symbol: str = '',
-                     unit_group = GlobalParameterUnitGroup.LENGTH,
-                     definition_type = GlobalParameterDefinitionType.DEFINITION_TYPE_VALUE,
-                     definition_parameter = [],
-                     comment: str = '',
-                     params: dict = {}):
+    def __init__(self,
+                 no: int = 1,
+                 name: str = '',
+                 symbol: str = '',
+                 unit_group = GlobalParameterUnitGroup.LENGTH,
+                 definition_type = GlobalParameterDefinitionType.DEFINITION_TYPE_VALUE,
+                 definition_parameter = [],
+                 comment: str = '',
+                 params: dict = {}):
         '''
         for definition_type = GlobalParameterDefinitionType.DEFINITION_TYPE_FORMULA:
             definition_parameter = [formula]
@@ -31,7 +30,7 @@ class GlobalParameter():
         '''
 
         # Client model | Global Parameter
-        clientObject = clientModel.factory.create('ns0:global_parameter')
+        clientObject = Model.clientModel.factory.create('ns0:global_parameter')
 
         # Clears object attributes | Sets all attributes to None
         clearAtributes(clientObject)
@@ -42,7 +41,7 @@ class GlobalParameter():
         # Global Parameter Name
         clientObject.name = name
 
-        # Symbol (HTML)
+        # Symbol (HTML format)
         clientObject.symbol = symbol
 
         # Unit Group
@@ -77,7 +76,7 @@ class GlobalParameter():
             clientObject[key] = params[key]
 
         # Add Global Parameter to client model
-        clientModel.service.set_global_parameter(clientObject)
+        Model.clientModel.service.set_global_parameter(clientObject)
 
     def get_list_of_parameters_formula_allowed_for(self,
                                                    object_type=ObjectTypes.E_OBJECT_TYPE_SECTION,
@@ -90,18 +89,22 @@ class GlobalParameter():
             object_type (enum, required): Defaults to "E_OBJECT_TYPE_SECTION".
             object_no (int, required): Defaults to 1.
             parent_no (int, optional): Defaults to 1.
+        Returns:
+            allowed_params(list): list of all allowed parameters
         """
         # Client model | Object Location
-        clientObject = clientModel.factory.create('ns0:object_location')
+        clientObject = Model.clientModel.factory.create('ns0:object_location')
 
         clientObject.type = object_type.name
         clientObject.no = object_no
         clientObject.parent_no = parent_no
 
-        list_of_parameters = clientModel.service.get_list_of_parameters_formula_allowed_for(
-            clientObject)
+        list_of_parameters = Model.clientModel.service.get_list_of_parameters_formula_allowed_for(clientObject)
+        allowed_params = []
         for param in list_of_parameters.object_parameter_location:
-            print(param.attribute)
+            allowed_params.append(param.attribute)
+
+        return allowed_params
 
     def get_formula(self,
                     object_type=ObjectTypes.E_OBJECT_TYPE_SECTION,
@@ -116,21 +119,22 @@ class GlobalParameter():
             object_no (int, required): Defaults to 1.
             property (string, required): Defaults to "area_shear_y".
             parent_no (int, optional): Defaults to 1.
+        Returns:
+            formula (str): formula for given type of object, numbrt, property and parent.
         """
         # Object Location
-        object_location = clientModel.factory.create('ns0:object_location')
+        object_location = Model.clientModel.factory.create('ns0:object_location')
 
         object_location.type = object_type.name
         object_location.no = object_no
         object_location.parent_no = parent_no
 
         # Object Parameter Location Type
-        parameter_location = clientModel.factory.create(
-            'ns0:object_parameter_location_type')
+        parameter_location = Model.clientModel.factory.create('ns0:object_parameter_location_type')
         parameter_location.attribute = property
 
         # Return Formula
-        return clientModel.service.get_formula(object_location, parameter_location)
+        return Model.clientModel.service.get_formula(object_location, parameter_location)
 
     def set_formula(self,
                     object_type=ObjectTypes.E_OBJECT_TYPE_SECTION,
@@ -150,17 +154,15 @@ class GlobalParameter():
         """
 
         # Object Location
-        object_location = clientModel.factory.create('ns0:object_location')
+        object_location = Model.clientModel.factory.create('ns0:object_location')
 
         object_location.type = object_type.name
         object_location.no = object_no
         object_location.parent_no = parent_no
 
         # Object Parameter Location Type
-        parameter_location = clientModel.factory.create(
-            'ns0:object_parameter_location_type')
+        parameter_location = Model.clientModel.factory.create('ns0:object_parameter_location_type')
         parameter_location.attribute = property
 
         # Set Formula
-        clientModel.service.set_formula(
-            object_location, parameter_location, formula)
+        Model.clientModel.service.set_formula(object_location, parameter_location, formula)

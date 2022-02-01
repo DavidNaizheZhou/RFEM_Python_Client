@@ -1,5 +1,4 @@
-from RFEM.initModel import *
-from RFEM.enums import SetType
+from RFEM.initModel import Model,clearAtributes
 
 class DesignSituation():
     def __init__(self,
@@ -49,13 +48,13 @@ class DesignSituation():
                     6193 = SLS - Characteristic,
                     6194 = SLS - Frequent,
                     6195 = SLS - Quasi-permanent.
-                    
+
             comment (str, optional): Comments
             params (dict, optional): Parameters
         """
 
         # Client model | Design Situation
-        clientObject = clientModel.factory.create('ns0:design_situation')
+        clientObject = Model.clientModel.factory.create('ns0:design_situation')
 
         # Clears object atributes | Sets all atributes to None
         clearAtributes(clientObject)
@@ -65,8 +64,8 @@ class DesignSituation():
 
         # Design Situation Name
         clientObject.user_defined_name_enabled = user_defined_name
-        if user_defined_name == True:
-            if name == None:
+        if user_defined_name:
+            if name is None:
                 raise Exception('WARNING: A user defined design situation name was requested. As such, the name parameter cannot be empty.')
             clientObject.name = name
 
@@ -84,4 +83,4 @@ class DesignSituation():
             clientObject[key] = params[key]
 
         # Add Design Situation to client model
-        clientModel.service.set_design_situation(clientObject)
+        Model.clientModel.service.set_design_situation(clientObject)

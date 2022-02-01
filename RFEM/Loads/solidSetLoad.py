@@ -1,5 +1,5 @@
-from RFEM.initModel import *
-from RFEM.enums import *
+from RFEM.initModel import Model, clearAtributes, ConvertToDlString
+from RFEM.enums import SolidSetLoadType, SolidSetLoadDistribution, SolidSetLoadDirection
 
 class SolidSetLoad():
 
@@ -15,7 +15,7 @@ class SolidSetLoad():
                  params: dict = {}):
 
         # Client model | Solid Load
-        clientObject = clientModel.factory.create('ns0:solid_set_load')
+        clientObject = Model.clientModel.factory.create('ns0:solid_set_load')
 
         # Clears object attributes | Sets all attributes to None
         clearAtributes(clientObject)
@@ -49,7 +49,7 @@ class SolidSetLoad():
             clientObject[key] = params[key]
 
         # Add Solid Load to client model
-        clientModel.service.set_solid_set_load(load_case_no, clientObject)
+        Model.clientModel.service.set_solid_set_load(load_case_no, clientObject)
 
 
     def Force(self,
@@ -62,7 +62,7 @@ class SolidSetLoad():
               params: dict = {}):
 
         # Client model | Solid Load
-        clientObject = clientModel.factory.create('ns0:solid_set_load')
+        clientObject = Model.clientModel.factory.create('ns0:solid_set_load')
 
         # Clears object attributes | Sets all attributes to None
         clearAtributes(clientObject)
@@ -96,7 +96,7 @@ class SolidSetLoad():
             clientObject[key] = params[key]
 
         # Add Solid Load to client model
-        clientModel.service.set_solid_set_load(load_case_no, clientObject)
+        Model.clientModel.service.set_solid_set_load(load_case_no, clientObject)
 
     def Temperature(self,
                     no: int = 1,
@@ -116,7 +116,7 @@ class SolidSetLoad():
             {''}
         '''
         # Client model | Solid Load
-        clientObject = clientModel.factory.create('ns0:solid_set_load')
+        clientObject = Model.clientModel.factory.create('ns0:solid_set_load')
 
         # Clears object attributes | Sets all attributes to None
         clearAtributes(clientObject)
@@ -152,7 +152,7 @@ class SolidSetLoad():
             clientObject[key] = params[key]
 
         # Add Solid Load to client model
-        clientModel.service.set_solid_set_load(load_case_no, clientObject)
+        Model.clientModel.service.set_solid_set_load(load_case_no, clientObject)
 
     def Strain(self,
                no: int = 1,
@@ -172,7 +172,7 @@ class SolidSetLoad():
             {''}
         '''
         # Client model | Solid Load
-        clientObject = clientModel.factory.create('ns0:solid_set_load')
+        clientObject = Model.clientModel.factory.create('ns0:solid_set_load')
 
         # Clears object attributes | Sets all attributes to None
         clearAtributes(clientObject)
@@ -214,7 +214,7 @@ class SolidSetLoad():
             clientObject[key] = params[key]
 
         # Add Solid Load to client model
-        clientModel.service.set_solid_set_load(load_case_no, clientObject)
+        Model.clientModel.service.set_solid_set_load(load_case_no, clientObject)
 
     def Motion(self,
                no: int = 1,
@@ -230,7 +230,7 @@ class SolidSetLoad():
             {''}
         '''
         # Client model | Solid Load
-        clientObject = clientModel.factory.create('ns0:solid_set_load')
+        clientObject = Model.clientModel.factory.create('ns0:solid_set_load')
 
         # Clears object attributes | Sets all attributes to None
         clearAtributes(clientObject)
@@ -269,12 +269,10 @@ class SolidSetLoad():
             clientObject[key] = params[key]
 
         # Add Solid Load to client model
-        clientModel.service.set_solid_set_load(load_case_no, clientObject)
+        Model.clientModel.service.set_solid_set_load(load_case_no, clientObject)
 
-    def Buoyancy():
-        print('The function Buoyancy() is not implemented yet.')
-        pass
+    #def Buoyancy():
+    #    print('The function Buoyancy() is not implemented yet.')
 
-    def Gass():
-        print('The function Gass() is not implemented yet.')
-        pass
+    #def Gas():
+    #    print('The function Gas() is not implemented yet.')

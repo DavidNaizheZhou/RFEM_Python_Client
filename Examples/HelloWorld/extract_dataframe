@@ -1,0 +1,66 @@
+import os
+import sys
+
+baseName = os.path.basename(__file__)
+dirName = os.path.dirname(__file__)
+print("basename:    ", baseName)
+print("dirname:     ", dirName)
+sys.path.append(dirName + r"/../..")
+
+import pandas as pd
+import numpy as np
+
+from RFEM.initModel import Model, ConvertStrToListOfInt
+from RFEM.BasicObjects.node import Node
+from RFEM.BasicObjects.material import Material
+from RFEM.BasicObjects.section import Section
+from RFEM.BasicObjects.member import Member
+
+
+def load_object(clientModel, type="NODE"):
+    numbers = ConvertStrToListOfInt(
+        clientModel.service.get_all_object_numbers(
+            type="E_OBJECT_TYPE_{}".format(type.upper())
+        )
+    )
+    if type.upper() == "NODE":
+        return [Model.clientModel.service.get_node(int(n)) for n in numbers]
+    elif type.upper() == "MEMBER":
+        return [Model.clientModel.service.get_member(int(n)) for n in numbers]
+    else:
+        # todo object types
+        pass
+
+
+def load_dataframe(clientModel, type="NODE"):
+    object_list = load_object(clientModel, type)
+    len_numbers = len(object_list)
+    if len_numbers != 0:
+        keys = dict(object_list[0]).keys()
+        dataframe = pd.DataFrame(columns=keys, index=range(len_numbers), dtype=object)
+        for i, node in enumerate(object_list):
+            node_dict = dict(node)
+            values = node_dict.values()
+            dataframe.iloc[i] = np.array([value for value in values], dtype=object)
+        return dataframe
+    else:
+        return pd.DataFrame()
+
+
+def get_free_numbers(used_numbers, range=(1, 1000)):
+    free_numbers = np.setxor1d(range(range[0], range[1]), used_numbers)
+    return free_numbers
+
+
+Model(new_model=True, model_name="extract_dataframe")
+
+# model modification
+Model.clientModel.service.begin_modification()
+Node(1, 0.0, 0.0, 0.0)
+Node(2, 1.0, 0.0, 0.0)
+Node(3, 2.0, 0.0, 0.0)
+Model.clientModel.service.finish_modification()
+
+# load dataframe
+df = load_dataframe(Model.clientModel, type="MEMBER")
+print(df)

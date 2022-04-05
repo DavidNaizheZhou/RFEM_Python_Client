@@ -123,11 +123,44 @@ def convert_node_array_to_tuple(node_numbers: np.ndarray):
 
 
 def place_top_bot_members(coords: np.ndarray, height: float, section_no: int = 1):
+    """places top bot with offset and a single array
+
+    :param coords: _description_
+    :type coords: np.ndarray
+    :param height: _description_
+    :type height: float
+    :param section_no: _description_, defaults to 1
+    :type section_no: int, optional
+    :return: _description_
+    :rtype: _type_
+    """
+
     node_no_top = place_nodes(coords)
     generate_members_from_tuples(node_no_top, section_no=section_no)
     height_offset = np.zeros(coords.shape)
     height_offset[:, 2] = height_offset[:, 2] + height
     node_no_bot = place_nodes(coords + height_offset)
+    generate_members_from_tuples(node_no_bot, section_no=section_no)
+    node_no = np.zeros((node_no_top.size, 2)).astype(int)
+    node_no[:, 0] = node_no_top
+    node_no[:, 1] = node_no_bot
+    return node_no
+
+def place_top_bot_members_2(coord_bot: np.ndarray, coord_top: np.ndarray, section_no: int = 1):
+    """places top bot with two arrays
+
+    :param coords: _description_
+    :type coords: np.ndarray
+    :param height: _description_
+    :type height: float
+    :param section_no: _description_, defaults to 1
+    :type section_no: int, optional
+    :return: _description_
+    :rtype: _type_
+    """
+    node_no_top = place_nodes(coord_top)
+    generate_members_from_tuples(node_no_top, section_no=section_no)
+    node_no_bot = place_nodes(coord_bot)
     generate_members_from_tuples(node_no_bot, section_no=section_no)
     node_no = np.zeros((node_no_top.size, 2)).astype(int)
     node_no[:, 0] = node_no_top
@@ -296,6 +329,26 @@ def place_beams_connection(
     section_no_con=1,
     **cs_props
 ):
+    """_summary_
+
+    :param node_no: _description_
+    :type node_no: np.ndarray
+    :param num_fields: _description_
+    :type num_fields: int
+    :param pattern: _description_, defaults to "\"
+    :type pattern: str, optional
+    :param from_field: _description_, defaults to 0
+    :type from_field: int, optional
+    :param to_field: _description_, defaults to -1
+    :type to_field: int, optional
+    :param section_no_diag: _description_, defaults to 1
+    :type section_no_diag: int, optional
+    :param section_no_vert: _description_, defaults to 1
+    :type section_no_vert: int, optional
+    :param section_no_con: _description_, defaults to 1
+    :type section_no_con: int, optional
+    """
+
     h_top = cs_props.get("h_top", 0.1)
     h_bot = cs_props.get("h_bot", 0.1)
     node_no_top = node_no[:, 0]
@@ -541,6 +594,55 @@ def fachwerk():
     Model.clientModel.service.finish_modification()
 
 
+def fachwerk_half_circle():
+    Model(new_model=True, model_name="fachwerk_spiral")
+    # SetModelType(model_type=ModelType.E_MODEL_TYPE_2D_XZ_PLANE_STRESS)
+    SetModelType(model_type=ModelType.E_MODEL_TYPE_3D)
+    Material(1, "GL24h")
+    Material(2, "S235JRH")
+    Section(1, "R_M1 50/50")
+    Section(2, "R_M1 20/20")
+    Section(3, "ROUND 5/H", material_no=2)
+
+    section_OG = dict(Model.clientModel.service.get_section(1))
+    section_UG = dict(Model.clientModel.service.get_section(1))
+    height_dict = {
+        "h_top": section_OG.get("depth_temperature_load") / 2,
+        "h_bot": section_UG.get("depth_temperature_load") / 2,
+    }
+
+    periods = 1
+    t = np.linspace(0, 2 * np.pi * periods, 60 * periods + 1)
+    R = np.linspace(4, 7, t.size)
+    R = 6
+    a = 3
+
+    coords_top = np.zeros((t.size, 3))
+    coords_top[:, 0] = R * np.sin(t)  # x
+    coords_top[:, 1] = R * np.cos(t)  # y
+    coords_top[:, 2] = 0
+
+    R = np.linspace(3, 6, t.size)
+    coords_bot = np.zeros((t.size, 3))
+    coords_bot[:, 0] = R * np.sin(t)  # x
+    coords_bot[:, 1] = R * np.cos(t)  # y
+    coords_bot[:, 2] = 2
+
+    num_fields = 20 * periods
+    Model.clientModel.service.begin_modification()
+    node_no = place_top_bot_members_2(coord_bot=coords_bot, coord_top=coords_top)
+    place_beams_connection(
+        node_no,
+        num_fields,
+        pattern="/\\|",
+        section_no_vert=1,
+        section_no_diag=2,
+        section_no_con=3,
+        **height_dict
+    )
+    Model.clientModel.service.finish_modification()
+
+
 def fachwerk_spiral():
     Model(new_model=True, model_name="fachwerk_spiral")
     # SetModelType(model_type=ModelType.E_MODEL_TYPE_2D_XZ_PLANE_STRESS)
@@ -586,4 +688,5 @@ def fachwerk_spiral():
 if __name__ == "__main__":
     # fachwerk_sinosoidal()
     # fachwerk_spiral()
-    fachwerk()
+    # fachwerk()
+    fachwerk_half_circle()

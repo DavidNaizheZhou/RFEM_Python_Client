@@ -173,7 +173,6 @@ class Model:
                 if modelLs[i] == model_name:
                     modelIndex = i
             new = client.service.get_model(modelIndex) + "wsdl"
-            print("new:", new)
             cModel = Client(new, transport=trans)
             if delete:
                 print("Deleting results...")

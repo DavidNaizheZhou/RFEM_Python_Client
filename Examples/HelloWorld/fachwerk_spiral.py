@@ -12,7 +12,7 @@ R = 10
 x = np.linspace(0, 2 * np.pi, 51)
 a = 10
 
-coords = np.zeros((x.size, 3))
+coords = np.zeros((t.size, 3))
 # coords[:, 0] = R * np.cos(t)
 # coords[:, 1] = R * np.sin(t)
 # coords[:, 2] = a * t/(2 * np.pi)*5
